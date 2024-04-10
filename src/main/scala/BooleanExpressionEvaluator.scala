@@ -1,38 +1,40 @@
 object BooleanExpressionEvaluator {
-  def evaluateExpression (expression: BooleanExpression, data: Map[String, Boolean] = Map.empty): Either[String, Boolean] = expression match {
+  def evaluateExpression(expression: BooleanExpression, data: Map[String, Boolean] = Map.empty): Either[String, Boolean] = {
+    val simplifiedExpression = simplifyExpression(expression)
+    evaluateSimplifiedExpression(simplifiedExpression, data)
+  }
+
+  private def evaluateSimplifiedExpression(expression: BooleanExpression, data: Map[String, Boolean]): Either[String, Boolean] = expression match {
     case True => Right(true)
-
     case False => Right(false)
-
     case Variable(name) => data.get(name) match {
       case Some(value) => Right(value)
       case None => Left(s"Variable '$name' is not defined in the data")
     }
-
-    case Not(subExpr) => evaluateExpression(subExpr, data).map(!_)
+    case Not(subExpr) => evaluateSimplifiedExpression(subExpr, data).map(!_)
 
     case And(left, right) =>
       for {
-        leftResult <- evaluateExpression(left, data)
-        rightResult <- evaluateExpression(right, data)
+        leftResult <- evaluateSimplifiedExpression(left, data)
+        rightResult <- evaluateSimplifiedExpression(right, data)
       } yield leftResult && rightResult
 
     case Or(left, right) =>
       for {
-        leftResult <- evaluateExpression(left, data)
-        rightResult <- evaluateExpression(right, data)
+        leftResult <- evaluateSimplifiedExpression(left, data)
+        rightResult <- evaluateSimplifiedExpression(right, data)
       } yield leftResult || rightResult
 
     case Implication(left, right) =>
       for {
-        leftResult <- evaluateExpression(left, data)
-        rightResult <- evaluateExpression(right, data)
+        leftResult <- evaluateSimplifiedExpression(left, data)
+        rightResult <- evaluateSimplifiedExpression(right, data)
       } yield !leftResult || rightResult
 
     case Equality(left, right) =>
       for {
-        leftResult <- evaluateExpression(left, data)
-        rightResult <- evaluateExpression(right, data)
+        leftResult <- evaluateSimplifiedExpression(left, data)
+        rightResult <- evaluateSimplifiedExpression(right, data)
       } yield leftResult == rightResult
   }
 

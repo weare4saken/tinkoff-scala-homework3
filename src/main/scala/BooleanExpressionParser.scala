@@ -9,7 +9,7 @@ object BooleanExpressionParser extends JavaTokenParsers {
 
   def notExpressionFactor: Parser[BooleanExpression] = "!" ~> expressionFactor ^^ Not
 
-  def variable: Parser[BooleanExpression] = """[a-zA-Z_]\w*""".r ^^ Variable
+  def variable: Parser[BooleanExpression] = """[a-zA-Z]\w*""".r ^^ Variable
 
   def literal: Parser[BooleanExpression] = ("true" ^^^ True) | ("false" ^^^ False)
 
